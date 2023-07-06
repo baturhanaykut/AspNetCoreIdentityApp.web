@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace AspNetCoreIdentityApp.web.Extensions
 {
@@ -13,6 +14,16 @@ namespace AspNetCoreIdentityApp.web.Extensions
 
 
             
+        }
+        public static void AddModelErrolList(this ModelStateDictionary modelState, IEnumerable<IdentityError> errors)
+        {
+            errors.ToList().ForEach(x =>
+            {
+                modelState.AddModelError(string.Empty, x.Description);
+            });
+
+
+
         }
     }
 }

@@ -25,14 +25,23 @@ namespace AspNetCoreIdentityApp.web.Services
                 Credentials = new NetworkCredential(_emailSettings.Email, _emailSettings.Password),
                 EnableSsl = true
             };
-            var mailMessage = new MailMessage();
-            mailMessage.From = new MailAddress(_emailSettings.Email);
-            mailMessage.To.Add(ToEmail);
-            mailMessage.Subject = "Localhost | Şifre sıfırlama linki";
-            mailMessage.Body = @$"
+            MailMessage mailMessage = new()
+            {
+                From = new MailAddress(_emailSettings.Email),
+                Subject = "Localhost | Şifre sıfırlama linki",
+                Body = @$"
                 <h4>Şifrenizi yenilemek için aşağıdaki linke tıklayanız. </h4>
-                <p><a href='{resetPasswordEmailLink}'>Şifre yenileme link</a></p>";
-            mailMessage.IsBodyHtml = true;
+                <p><a href='{resetPasswordEmailLink}'>Şifre yenileme link</a></p>",
+                IsBodyHtml = true,
+                To={ToEmail}
+                
+            };
+            //mailMessage.To.Add(ToEmail);
+            //mailMessage.Subject = "Localhost | Şifre sıfırlama linki";
+            //mailMessage.Body = @$"
+            //    <h4>Şifrenizi yenilemek için aşağıdaki linke tıklayanız. </h4>
+            //    <p><a href='{resetPasswordEmailLink}'>Şifre yenileme link</a></p>";
+            //mailMessage.IsBodyHtml = true;
             await smtpClient.SendMailAsync(mailMessage);
         }
     }

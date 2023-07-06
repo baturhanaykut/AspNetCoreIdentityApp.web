@@ -7,7 +7,7 @@ namespace AspNetCoreIdentityApp.web.ViewModels
         [EmailAddress(ErrorMessage = "Email formatı yanlıştır.")]
         [Required(ErrorMessage = "Kullanıcı Email alanı boş bırakılamaz.")]
         [Display(Name = "Email :")]
-        public string Email { get; set; }
+        public string Email { get; set; } = null!;
 
 
     }
