@@ -1,11 +1,13 @@
 ﻿using AspNetCoreIdentityApp.web.Areas.Admin.Models;
 using AspNetCoreIdentityApp.web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreIdentityApp.web.Areas.Admin.Controllers
 {
+    [Authorize(Roles = "admin")]
     [Area("Admin")]
     public class HomeController : Controller
     {

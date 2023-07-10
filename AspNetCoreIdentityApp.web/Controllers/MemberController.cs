@@ -22,7 +22,7 @@ namespace AspNetCoreIdentityApp.web.Controllers
             _fileProvider = fileProvider;
         }
 
-        public async Task<IActionResult> IndexAsync()
+        public async Task<IActionResult> Index()
         {
             var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
 
@@ -34,8 +34,8 @@ namespace AspNetCoreIdentityApp.web.Controllers
                 BirthDate = currentUser.BirthDate,
                 Gender = currentUser.Gender,
                 PictureUrl = currentUser.Picture
-               
-                
+
+
 
             };
             return View(userViewModel);
@@ -47,7 +47,6 @@ namespace AspNetCoreIdentityApp.web.Controllers
 
             //return RedirectToAction("Index","Home");
         }
-
 
         public IActionResult PasswordChange()
         {
@@ -128,14 +127,14 @@ namespace AspNetCoreIdentityApp.web.Controllers
                 var randomFileName = $"{Guid.NewGuid().ToString()}{Path.GetExtension(request.Picture.FileName)}";
 
                 var newPicturePath = Path.Combine(wwwrootFolder!.First(x => x.Name == "userpictures").PhysicalPath!, randomFileName);
-                
+
                 using var stream = new FileStream(newPicturePath, FileMode.Create);
 
                 await request.Picture.CopyToAsync(stream);
                 currentUser.Picture = randomFileName;
             }
 
-            var updateToResult =  await _userManager.UpdateAsync(currentUser);
+            var updateToResult = await _userManager.UpdateAsync(currentUser);
 
             if (!updateToResult.Succeeded)
             {
@@ -161,5 +160,19 @@ namespace AspNetCoreIdentityApp.web.Controllers
 
             return View(userEditViewModel);
         }
+
+
+        public IActionResult AccessDenied(string ReturnUrl)
+        {
+
+            string message = string.Empty;
+
+            message = "Bu sayfayı göremeye yetkiniz yoktur. Yetki almak için yöneticiniz ile görüşebilirsiniz.";
+
+            ViewBag.message = message;
+            return View();
+        }
+
+
     }
 }
