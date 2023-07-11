@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.FileProviders;
 
+
 namespace AspNetCoreIdentityApp.web.Controllers
 {
     [Authorize]
@@ -23,7 +24,7 @@ namespace AspNetCoreIdentityApp.web.Controllers
         }
 
         public async Task<IActionResult> Index()
-        {
+        {            
             var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
 
             var userViewModel = new UserViewModel
@@ -35,8 +36,6 @@ namespace AspNetCoreIdentityApp.web.Controllers
                 Gender = currentUser.Gender,
                 PictureUrl = currentUser.Picture
 
-
-
             };
             return View(userViewModel);
         }
@@ -47,7 +46,7 @@ namespace AspNetCoreIdentityApp.web.Controllers
 
             //return RedirectToAction("Index","Home");
         }
-
+        [HttpGet]
         public IActionResult PasswordChange()
         {
 
@@ -87,6 +86,8 @@ namespace AspNetCoreIdentityApp.web.Controllers
 
             return View();
         }
+        
+        [HttpGet]
         public async Task<IActionResult> UserEdit()
         {
             ViewBag.GenderList = new SelectList(Enum.GetNames(typeof(Gender)));
@@ -103,6 +104,7 @@ namespace AspNetCoreIdentityApp.web.Controllers
             };
             return View(userEditViewModel);
         }
+        
         [HttpPost]
         public async Task<IActionResult> UserEdit(UserEditViewModel request)
         {
@@ -161,7 +163,6 @@ namespace AspNetCoreIdentityApp.web.Controllers
             return View(userEditViewModel);
         }
 
-
         public IActionResult AccessDenied(string ReturnUrl)
         {
 
@@ -173,6 +174,33 @@ namespace AspNetCoreIdentityApp.web.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult Claims()
+        {
+            var userClaimList = User.Claims.Select(x => new ClaimViewModel()
+            {
+                Issuer = x.Issuer,
+                Type = x.Type,
+                Value = x.Value
+            }).ToList();
+                    
+            return View(userClaimList);
+        }
 
+        [Authorize(Policy = "İstanbulPolicy")]
+        [HttpGet]
+        public IActionResult Istanbul()
+        {
+
+            return View();
+        }
+
+        [Authorize(Policy = "ExchangePolicy")]
+        [HttpGet]
+        public IActionResult ExchangePage()
+        {
+
+            return View();
+        }
     }
 }

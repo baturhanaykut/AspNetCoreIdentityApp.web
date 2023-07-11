@@ -10,6 +10,9 @@
 
                 <li><a class="dropdown-item" asp-controller="Member" asp-action="Index">Profil</a></li>
                 <li><a class="dropdown-item" asp-controller="Member" asp-action="UserEdit">Profil Güncelle</a></li>
+                <li><a class="dropdown-item" asp-controller="Member" asp-action="Claims">Claim Listesi</a></li>
+                <li><a class="dropdown-item" asp-controller="Member" asp-action="Istanbul">İstanbul Claim Plociy</a></li>
+                <li><a class="dropdown-item" asp-controller="Member" asp-action="ExchangePage">Borsa Claim Plociy</a></li>
                 @{
                     if (User.HasClaim(x => x.Type == ClaimTypes.Role && x.Value == "admin"))
                     {

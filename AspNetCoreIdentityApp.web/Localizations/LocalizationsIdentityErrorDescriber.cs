@@ -22,6 +22,11 @@ namespace AspNetCoreIdentityApp.web.Localizations
             //return base.PasswordTooShort(length);
         }
 
+        public override IdentityError PasswordRequiresUpper()
+        {
+            return new() { Code = "PasswordRequiresUpper", Description = "Lütfen bir adet büyük harf kullanınız." };
+        }
+
 
     }
 }

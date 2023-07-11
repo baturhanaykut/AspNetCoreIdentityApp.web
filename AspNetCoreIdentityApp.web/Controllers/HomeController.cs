@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using AspNetCoreIdentityApp.web.Extensions;
 using AspNetCoreIdentityApp.web.Services;
+using System.Security.Claims;
 
 namespace AspNetCoreIdentityApp.web.Controllers
 {
@@ -50,20 +51,27 @@ namespace AspNetCoreIdentityApp.web.Controllers
 
             var identityResult = await _userManager.CreateAsync(new() { UserName = request.UserName, PhoneNumber = request.Phone, Email = request.Email }, request.PasswordConfirm);
 
-            if (identityResult.Succeeded)
+            if (!identityResult.Succeeded)
             {
-                TempData["SuccessMessage"] = "Üyelik kayıt işlemi başarıylar gerçekleşmiştir.";
-                return RedirectToAction(nameof(HomeController.SignUp));
+                ModelState.AddModelErrolList(identityResult.Errors.Select(x => x.Description).ToList());
+                return View();
             }
 
-            ModelState.AddModelErrolList(identityResult.Errors.Select(x => x.Description).ToList());
 
-            //foreach (IdentityError item in identityResult.Errors)
-            //{
-            //    ModelState.AddModelError(string.Empty, item.Description);
-            //}
+            var exchangeExpireClaim = new Claim("ExchangeExpireDate", DateTime.Now.AddDays(10).ToString());
 
-            return View();
+            var user = await _userManager.FindByNameAsync(request.UserName);
+            var claimResult = await _userManager.AddClaimAsync(user!, exchangeExpireClaim);
+
+            if (!claimResult.Succeeded)
+            {
+                ModelState.AddModelErrolList(claimResult.Errors.Select(x => x.Description).ToList());
+                return View();
+            }
+
+            TempData["SuccessMessage"] = "Üyelik kayıt işlemi başarıylar gerçekleşmiştir.";
+            return RedirectToAction(nameof(HomeController.SignUp));
+
         }
 
         public IActionResult SignIn()
@@ -109,8 +117,6 @@ namespace AspNetCoreIdentityApp.web.Controllers
             return View();
         }
 
-
-
         public IActionResult ForgetPassword()
         {
 
@@ -130,10 +136,8 @@ namespace AspNetCoreIdentityApp.web.Controllers
 
             string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
 
-            var passwordResetLink = Url.Action("ResetPassword", "Home", new { userID = hasUser.Id, Token = passwordResetToken },HttpContext.Request.Scheme);
+            var passwordResetLink = Url.Action("ResetPassword", "Home", new { userID = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
 
-
-            //örnek link https://localhost:7213?userId=12213&token=asdasdasfdasd
 
             await _emailService.SendResetPasswordEmail(passwordResetLink!, hasUser.Email!);
 
@@ -141,13 +145,12 @@ namespace AspNetCoreIdentityApp.web.Controllers
             return RedirectToAction(nameof(ForgetPassword));
         }
 
-
-        public IActionResult ResetPassword(string userId, string token) 
+        public IActionResult ResetPassword(string userId, string token)
         {
             TempData["userId"] = userId;
             TempData["token"] = token;
 
-            
+
             return View();
         }
 
@@ -179,7 +182,7 @@ namespace AspNetCoreIdentityApp.web.Controllers
             else
             {
                 ModelState.AddModelErrolList(result.Errors.Select(x => x.Description).ToList());
-               
+
             }
             return View();
 

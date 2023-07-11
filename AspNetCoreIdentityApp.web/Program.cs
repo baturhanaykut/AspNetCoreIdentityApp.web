@@ -1,7 +1,11 @@
+using AspNetCoreIdentityApp.web.ClaimProvider;
 using AspNetCoreIdentityApp.web.Extensions;
 using AspNetCoreIdentityApp.web.Models;
 using AspNetCoreIdentityApp.web.OptionsModel;
+using AspNetCoreIdentityApp.web.Requirements;
 using AspNetCoreIdentityApp.web.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +32,22 @@ builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddIdentityWithExt();
 builder.Services.AddScoped<IEmailService,EmailService>();
+builder.Services.AddScoped<IClaimsTransformation, UserClaimProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, ExechangeExpireRequrimentHandeler>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ÝstanbulPolicy", policy =>
+    {
+        policy.RequireClaim("city", "Ýstanbul", "Erzincan");
+    });
+
+    options.AddPolicy("ExchangePolicy", policy =>
+    {
+        policy.AddRequirements(new ExechangeExpireRequriment());
+    });
+
+});
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
