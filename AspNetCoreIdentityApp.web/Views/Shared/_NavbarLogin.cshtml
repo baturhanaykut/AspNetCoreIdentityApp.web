@@ -13,6 +13,8 @@
                 <li><a class="dropdown-item" asp-controller="Member" asp-action="Claims">Claim Listesi</a></li>
                 <li><a class="dropdown-item" asp-controller="Member" asp-action="Istanbul">İstanbul Claim Plociy</a></li>
                 <li><a class="dropdown-item" asp-controller="Member" asp-action="ExchangePage">Borsa Claim Plociy</a></li>
+                <li><a class="dropdown-item" asp-controller="Member" asp-action="ViolencePage">Yaş Sınırı Claim Plociy</a></li>
+                <li><a class="dropdown-item" asp-controller="Order" asp-action="Index">Order Sayaf Permission</a></li>
                 @{
                     if (User.HasClaim(x => x.Type == ClaimTypes.Role && x.Value == "admin"))
                     {

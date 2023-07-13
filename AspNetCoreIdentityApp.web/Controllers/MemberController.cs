@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.FileProviders;
-
+using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace AspNetCoreIdentityApp.web.Controllers
 {
@@ -24,7 +25,7 @@ namespace AspNetCoreIdentityApp.web.Controllers
         }
 
         public async Task<IActionResult> Index()
-        {            
+        {
             var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
 
             var userViewModel = new UserViewModel
@@ -86,7 +87,7 @@ namespace AspNetCoreIdentityApp.web.Controllers
 
             return View();
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> UserEdit()
         {
@@ -104,7 +105,7 @@ namespace AspNetCoreIdentityApp.web.Controllers
             };
             return View(userEditViewModel);
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> UserEdit(UserEditViewModel request)
         {
@@ -146,7 +147,17 @@ namespace AspNetCoreIdentityApp.web.Controllers
 
             await _userManager.UpdateSecurityStampAsync(currentUser);
             await _signInManager.SignOutAsync();
-            await _signInManager.SignInAsync(currentUser, true);
+
+            if (request.BirthDate.HasValue)
+            {
+                await _signInManager.SignInWithClaimsAsync(currentUser, true, new[] { new Claim("birthdate", currentUser.BirthDate!.Value.ToString()) });
+            }
+            else
+            {
+                await _signInManager.SignInAsync(currentUser, true);
+
+            }
+
 
             TempData["SuccessMessage"] = "Üye bilgileri başarı ile değiştirilmiştir.";
 
@@ -163,16 +174,6 @@ namespace AspNetCoreIdentityApp.web.Controllers
             return View(userEditViewModel);
         }
 
-        public IActionResult AccessDenied(string ReturnUrl)
-        {
-
-            string message = string.Empty;
-
-            message = "Bu sayfayı göremeye yetkiniz yoktur. Yetki almak için yöneticiniz ile görüşebilirsiniz.";
-
-            ViewBag.message = message;
-            return View();
-        }
 
         [HttpGet]
         public IActionResult Claims()
@@ -183,7 +184,7 @@ namespace AspNetCoreIdentityApp.web.Controllers
                 Type = x.Type,
                 Value = x.Value
             }).ToList();
-                    
+
             return View(userClaimList);
         }
 
@@ -200,6 +201,24 @@ namespace AspNetCoreIdentityApp.web.Controllers
         public IActionResult ExchangePage()
         {
 
+            return View();
+        }
+
+        [Authorize(Policy = "ViolencePolicy")]
+        [HttpGet]
+        public IActionResult ViolencePage()
+        {
+
+            return View();
+        }
+        public IActionResult AccessDenied(string ReturnUrl)
+        {
+
+            string message = string.Empty;
+
+            message = "Bu sayfayı göremeye yetkiniz yoktur. Yetki almak için yöneticiniz ile görüşebilirsiniz.";
+
+            ViewBag.message = message;
             return View();
         }
     }

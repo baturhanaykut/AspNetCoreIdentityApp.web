@@ -2,7 +2,9 @@ using AspNetCoreIdentityApp.web.ClaimProvider;
 using AspNetCoreIdentityApp.web.Extensions;
 using AspNetCoreIdentityApp.web.Models;
 using AspNetCoreIdentityApp.web.OptionsModel;
+using AspNetCoreIdentityApp.web.PermissionsRoot;
 using AspNetCoreIdentityApp.web.Requirements;
+using AspNetCoreIdentityApp.web.Seeds;
 using AspNetCoreIdentityApp.web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -34,6 +36,7 @@ builder.Services.AddIdentityWithExt();
 builder.Services.AddScoped<IEmailService,EmailService>();
 builder.Services.AddScoped<IClaimsTransformation, UserClaimProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, ExechangeExpireRequrimentHandeler>();
+builder.Services.AddScoped<IAuthorizationHandler, ViolenceRequrimentHandler>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -45,6 +48,16 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ExchangePolicy", policy =>
     {
         policy.AddRequirements(new ExechangeExpireRequriment());
+    }); 
+    options.AddPolicy("ViolencePolicy", policy =>
+    {
+        policy.AddRequirements(new ViolenceRequriment() { ThreshOldAge =18});
+    }); 
+    options.AddPolicy("OrderPermissionReadOrDeletePolicy", policy =>
+    {
+        policy.RequireClaim("permission", Permission.Order.Read);
+        policy.RequireClaim("permission", Permission.Order.Delete);
+        policy.RequireClaim("permission", Permission.Stock.Delete);
     });
 
 });
@@ -66,6 +79,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
+
+    await PermissionSeed.Seed(roleManager);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

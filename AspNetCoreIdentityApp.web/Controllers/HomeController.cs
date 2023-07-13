@@ -97,12 +97,8 @@ namespace AspNetCoreIdentityApp.web.Controllers
             }
 
 
-            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
 
-            if (signInResult.Succeeded)
-            {
-                return Redirect(returnUrl!);
-            }
+            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
 
             if (signInResult.IsLockedOut)
             {
@@ -110,11 +106,21 @@ namespace AspNetCoreIdentityApp.web.Controllers
                 return View();
             }
 
+            if (!signInResult.Succeeded)
+            {
+                ModelState.AddModelErrolList(new List<string>() { "Email veya şifre yanlış", $"Başarısız giriş sayısı{await _userManager.GetAccessFailedCountAsync(hasUser)}" });
+                return View();
 
-            ModelState.AddModelErrolList(new List<string>() { "Email veya şifre yanlış", $"Başarısız giriş sayısı{await _userManager.GetAccessFailedCountAsync(hasUser)}" });
+            }
 
 
-            return View();
+            if (hasUser.BirthDate.HasValue)
+            {
+                await _signInManager.SignInWithClaimsAsync(hasUser, model.RememberMe, new[] { new Claim("birthdate", hasUser.BirthDate.Value.ToString()) });
+
+            }
+            return Redirect(returnUrl!);
+
         }
 
         public IActionResult ForgetPassword()
